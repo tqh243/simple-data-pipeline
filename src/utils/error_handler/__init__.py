@@ -1,8 +1,6 @@
 import os
 import logging
 
-from src.utils.alerting.telegram_alert import send_message
-
 ENVIRONMENT = os.getenv('ENV')
 
 data_pipeline_chat_id = os.getenv('TELEGRAM_ALERT_GROUP_CHAT_ID')
@@ -38,6 +36,6 @@ def handle_output(output_info: OutputInfo):
         if output_info.status == output_info.JOB_FAIL:
             error_msg = f"[ERROR] {output_info.job_type} - {output_info.job_name}: \n{output_info.error_msg}"
             if ENVIRONMENT == 'PROD':
-                send_message(error_msg, data_pipeline_chat_id, parse_mode='html')
+                print(error_msg, data_pipeline_chat_id, parse_mode='html')
     except Exception as e:
         logging.error(e)
