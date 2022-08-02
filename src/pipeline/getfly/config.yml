@@ -1,0 +1,29 @@
+broward_accounts:
+  base_endpoint: broward.getflycrm.com
+  service_name: accounts
+  credential_key: broward
+
+broward_campaigns:
+  base_endpoint: broward.getflycrm.com
+  service_name: campaigns
+  credential_key: broward
+
+broward_products:
+  base_endpoint: broward.getflycrm.com
+  service_name: products
+  credential_key: broward
+
+apc_accounts:
+  base_endpoint: apc.getflycrm.com
+  service_name: accounts
+  credential_key: apc
+
+apc_campaigns:
+  base_endpoint: apc.getflycrm.com
+  service_name: campaigns
+  credential_key: apc
+
+apc_products:
+  base_endpoint: apc.getflycrm.com
+  service_name: products
+  credential_key: apc
