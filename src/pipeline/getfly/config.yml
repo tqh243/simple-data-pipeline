@@ -33,3 +33,4 @@ apc_products:
   service_name: products
   credential_key: apc
   table_name_postgres: getfly_apc_products
+
