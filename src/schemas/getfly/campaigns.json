@@ -1,0 +1,9 @@
+[
+	{"name": "campaign_id", "type": "VARCHAR", "is_primary_key": true},
+	{"name": "campaign_name", "type": "VARCHAR", "is_primary_key": false},
+    {"name": "token_api", "type": "VARCHAR", "is_primary_key": false},
+    {"name": "description", "type": "VARCHAR", "is_primary_key": false},
+    {"name": "start_date", "type": "VARCHAR", "is_primary_key": false},
+    {"name": "end_date", "type": "VARCHAR", "is_primary_key": false}
+    
+]
