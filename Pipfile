@@ -13,6 +13,8 @@ isodate = "*"
 numpy = "1.22.4"
 sqlalchemy = "==1.4.36"
 openpyxl = "*"
+package-name = "*"
+pyyaml = "*"
 
 [dev-packages]
 

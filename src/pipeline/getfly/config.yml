@@ -1,0 +1,35 @@
+broward_accounts:
+  base_endpoint: broward.getflycrm.com
+  service_name: accounts
+  credential_key: broward
+  table_name_postgres: getfly_broward_accounts
+
+broward_campaigns:
+  base_endpoint: broward.getflycrm.com
+  service_name: campaigns
+  credential_key: broward
+  table_name_postgres: getfly_broward_campaigns
+
+broward_products:
+  base_endpoint: broward.getflycrm.com
+  service_name: products
+  credential_key: broward
+  table_name_postgres: getfly_broward_products
+
+apc_accounts:
+  base_endpoint: apc.getflycrm.com
+  service_name: accounts
+  credential_key: apc
+  table_name_postgres: getfly_apc_accounts
+
+apc_campaigns:
+  base_endpoint: apc.getflycrm.com
+  service_name: campaigns
+  credential_key: apc
+  table_name_postgres: getfly_apc_campaigns
+
+apc_products:
+  base_endpoint: apc.getflycrm.com
+  service_name: products
+  credential_key: apc
+  table_name_postgres: getfly_apc_products

@@ -4,6 +4,7 @@
 
 ```
 pipenv install package_name
+pipenv install pyyaml
 ```
 
 
