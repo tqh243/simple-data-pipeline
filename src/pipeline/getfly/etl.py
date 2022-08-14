@@ -4,7 +4,7 @@ import json
 import argparse
 from pkgutil import get_data
 from urllib import response
- 
+
 import requests
 import yaml
  
@@ -19,15 +19,15 @@ class GetFlyETL:
     def __init__(self, args):
         self.job_name = args.job_name
         self.job_config = self.get_job_config
- 
+
     def get_credentials(self):
         file_credentials = f'{self.base_folder}/credentials.json'
         with open(file_credentials, 'r') as openfile:
             # Reading from json file
             json_object = json.load(openfile)
             return json_object
- 
- 
+            
+            
     def get_configs(self):
         file_config = f'{self.base_folder}/config.yml'
          # Reading from yml file
@@ -52,16 +52,16 @@ class GetFlyETL:
         api_key = job_config.get('api_key')
        
         url = f"https://{base_endpoint}/api/{self.api_version}/{service_name}/?page={page}"
+
         headers = {
             'X-API-KEY': api_key
         }
         response = requests.get(url, headers=headers)
-       
         if response.status_code == 200:
             return response.json()
         else:
             print(response.text)
- 
+
     def get_accounts(self):
         file_accounts = f'{self.base_getfly}/accounts.json'
         with open(file_accounts, 'r') as openfile:
@@ -157,7 +157,7 @@ class GetFlyETL:
             parsed_data = self.parse_account(item)
             all_data.append(parsed_data)
         return all_data
- 
+
     def process_campaigns_data(self):
         job_config = self.get_job_config()
         response_data = self.get_data(job_config)
@@ -225,4 +225,3 @@ if __name__ == '__main__':
     args_parser.add_argument('-j', '--job_name', required=True)
     args = args_parser.parse_args()
     GetFlyETL(args).execute()
-   
