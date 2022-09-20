@@ -61,18 +61,14 @@ class SqlServerETL:
         )
         os.makedirs(self.data_folder, exist_ok=True)
 
+    def _update_schema_type(self, column_name: str, value: str):
+        for idx, col in enumerate(self._schema):
+            if col.get('name') == column_name:
+                self._schema[idx]['type'] == value
+
     def _save_to_local(self, df: pd.DataFrame):
         filename = str(int(time.time())) + '.json'
         full_file_path = os.path.join(self.data_folder, filename)
-
-        # convert smalldateime/epoch time to timestamp
-        epoch_timestamp_columns = [x.get('name') for x in self._schema if x.get('type') == 'SMALLDATETIME']
-        if epoch_timestamp_columns:
-            print(epoch_timestamp_columns)
-            df[epoch_timestamp_columns] = pd.to_datetime(df[epoch_timestamp_columns], unit='ms')
-
-            # convert smalldatetime type to timestamp
-            df[df['type']=='SMALLDATETIME'] = 'TIMESTAMP'
 
         # sort columns follow order in schema if present
         columns = [x.get('name') for x in self._schema]
@@ -82,7 +78,12 @@ class SqlServerETL:
 
         df = df[columns]
 
-        df.to_json(full_file_path, orient='records', lines=True)
+        # string column
+        string_columns = [x.get('name') for x in self._schema if x.get('type')=='VARCHAR']
+        if string_columns:
+            df[string_columns] = df[string_columns].astype(str)
+
+        df.to_json(full_file_path, orient='records', date_format='iso', lines=True)
 
     def _prepare_queries(self):
         total_records = self.source_db_client.get_total_records(self.metadata.table_name)
@@ -130,6 +131,16 @@ class SqlServerETL:
     def _load_data_to_dwh(self):
         self._logger.info('Load data to DWH')
         self._initialize_dwh_client()
+        is_exist = self.dwh_client.check_table_exists(self.metadata.destination_table)
+
+        if is_exist:
+            self._logger.info(f'Table {self.metadata.destination_table} exists!')
+        else:
+            self.dwh_client.create_new_table(self.metadata.destination_table, self._schema)
+
+        if self.metadata.job_type == 'replace':
+            self.dwh_client.truncate_table(self.metadata.destination_table)
+
         files = utils.get_all_files_in_folder(self.data_folder, '*.json')
         try:
             for file in files:

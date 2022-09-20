@@ -67,11 +67,11 @@ class SqlServerDB:
         query = """
         SELECT COLUMN_NAME AS name,
             CASE
-                WHEN DATA_TYPE LIKE '%int%' THEN 'INTEGER'
-                WHEN DATA_TYPE IN ('decimal', 'money', 'NUMERIC') THEN 'FLOAT'
-                WHEN DATA_TYPE IN ('char', 'nchar', 'varchar','nvarchar','uniqueidentifier') THEN 'VARCHAR'
-                WHEN DATA_TYPE ='bit' THEN 'BOOLEAN'
-                WHEN DATA_TYPE ='datetime' THEN 'TIMESTAMP'
+                WHEN DATA_TYPE LIKE '%int%' THEN 'VARCHAR'
+                WHEN DATA_TYPE IN ('decimal', 'money') THEN 'FLOAT'
+                WHEN DATA_TYPE IN ('char', 'nchar', 'varchar','nvarchar','uniqueidentifier', 'SMALLDATETIME', 'NUMERIC') THEN 'VARCHAR'
+                WHEN DATA_TYPE = 'bit' THEN 'BOOLEAN'
+                WHEN DATA_TYPE IN ('datetime') THEN 'TIMESTAMP'
                 WHEN COLUMN_NAME = 'VersionNo' THEN 'BYTES'
                 ELSE UPPER(DATA_TYPE)
             END AS type

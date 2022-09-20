@@ -144,7 +144,7 @@ class PostgresDB:
             )
             fields_statement_components.append(field_type)
 
-            if field['is_primary_key']:
+            if field.get('is_primary_key'):
                 primary_keys_statement_components.append(field['name'])
 
         fields_statement = ',\n'.join(fields_statement_components)
@@ -181,7 +181,7 @@ class PostgresDB:
         update_statement = f'SET {update_columns_statement}'
 
         # get primary keys
-        primary_keys = [x['name'] for x in table_schema if x['is_primary_key']]
+        primary_keys = [x['name'] for x in table_schema if x.get('is_primary_key')]
         primary_keys_statement = ','.join(primary_keys)
 
         query = f"""
@@ -219,23 +219,18 @@ class PostgresDB:
         self._logger.info(f'Affected rows: {cursor.rowcount}')
         self.conn.commit()
 
-    def overwrite_data(self, table_name: str, table_schema: list, data: Union[list, dict]):
-        cursor = self.conn.cursor()
-        cursor.execute(f'TRUNCATE TABLE {table_name}')
+    def truncate_table(self, table_name: str):
+        self.cursor.execute(f'TRUNCATE TABLE {table_name}')
         self._logger.info(f'TABLE {table_name} IS TRUNCATED!')
+        self.conn.commit()
 
-        insert_query = self._prepare_insert_query(cursor, table_name, table_schema, data)
-        cursor.execute(insert_query)
-        self._logger.info(f'Affected rows: {cursor.rowcount}')
+    def insert_data(self, table_name: str, table_schema: list, data: Union[list, dict]):
+        insert_query = self._prepare_insert_query(self.cursor, table_name, table_schema, data)
+        self.cursor.execute(insert_query)
+        self._logger.info(f'Affected rows: {self.cursor.rowcount}')
         self.conn.commit()
 
     def sync_data_to_postgres(self, load_type: str, table_name: str, table_schema: list, data: Union[list, dict]):
-        is_exist = self.check_table_exists(table_name)
-        if is_exist:
-            self._logger.info(f'Table {table_name} exists!')
-        else:
-            self.create_new_table(table_name, table_schema)
-
         # convert data to tuple
         if isinstance(data, dict):
             final_data = [tuple(data.values())]
@@ -245,6 +240,6 @@ class PostgresDB:
         if load_type == 'merge':
             self.merge_data(table_name, table_schema, final_data)
         elif load_type == 'replace':
-            self.overwrite_data(table_name, table_schema, final_data)
+            self.insert_data(table_name, table_schema, final_data)
         else:
             raise NotImplementedError(f'Load type {load_type} is not implemented!')

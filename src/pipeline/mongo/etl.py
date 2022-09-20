@@ -126,6 +126,16 @@ class MongoETLJob:
     def _load_data_to_dwh(self):
         self._logger.info('Load data to DWH')
         self._initialize_dwh_client()
+        is_exist = self.dwh_client.check_table_exists(self._job_config.destination_table)
+
+        if is_exist:
+            self._logger.info(f'Table {self.metadata.table_name} exists!')
+        else:
+            self.dwh_client.create_new_table(self._job_config.destination_table, self._job_config.schema)
+
+        if self._job_config.job_type == 'replace':
+            self.dwh_client.truncate_table(self._job_config.destination_table)
+
         files = utils.get_all_files_in_folder(self.data_folder, '*.json')
         try:
             for file in files:
