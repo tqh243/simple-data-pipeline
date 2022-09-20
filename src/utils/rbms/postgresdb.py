@@ -77,6 +77,7 @@ class PostgresDB:
         return result[0]
 
     def get_columns_from_source_table(self, source_table_name: str):
+        source_table_name = source_table_name.replace('"', '')
         query = f"""
 			SELECT COLUMN_NAME
 			FROM INFORMATION_SCHEMA.COLUMNS
