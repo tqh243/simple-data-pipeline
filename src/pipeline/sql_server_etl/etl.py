@@ -66,6 +66,16 @@ class SqlServerETL:
             if col.get('name') == column_name:
                 self._schema[idx]['type'] == value
 
+    def _clean_local_staging(self):
+        self._logger.info('Clean up local staging.')
+        folder = os.path.join(
+            self.local_folder,
+            self.metadata.server_name,
+            self.metadata.db_name,
+            self.metadata.job_name
+        )
+        utils.clear_local_files(folder)
+
     def _save_to_local(self, df: pd.DataFrame):
         filename = str(int(time.time())) + '.json'
         full_file_path = os.path.join(self.data_folder, filename)
@@ -82,6 +92,9 @@ class SqlServerETL:
         string_columns = [x.get('name') for x in self._schema if x.get('type')=='VARCHAR']
         if string_columns:
             df[string_columns] = df[string_columns].astype(str)
+
+        # add bu_code column
+        df['bu_code'] = self.metadata.db_name
 
         df.to_json(full_file_path, orient='records', date_format='iso', lines=True)
 
@@ -128,6 +141,9 @@ class SqlServerETL:
         else:
             self._schema = self.source_db_client.get_schema_from_source_table(self.metadata.table_name)
 
+        # add bu_code column
+        self._schema.append({'name': 'bu_code', 'type': 'VARCHAR', 'mode': 'NULLABLE'})
+
     def _load_data_to_dwh(self):
         self._logger.info('Load data to DWH')
         self._initialize_dwh_client()
@@ -165,6 +181,7 @@ class SqlServerETL:
     def execute(self):
         try:
             self._initialize_source_db_client()
+            self._clean_local_staging()
             self._prepare_local_data_folder()
             self._prepare_schema()
             self._extract_data_from_source_db()
