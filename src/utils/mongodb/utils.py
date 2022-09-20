@@ -37,8 +37,10 @@ class MongoHandler:
             driver_type=driver_type,
             username=self._server_info.get('username'),
             password=self._server_info.get('password'),
-            host=self._server_info.get('host'),
-            port=int(self._server_info.get('port')),
+            # host=self._server_info.get('host'),
+            # port=int(self._server_info.get('port')),
+            host='host.docker.internal',
+            port=6000,
             authentication_db=self._server_info.get('mongo_authentication_db'),
         )
 

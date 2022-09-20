@@ -82,6 +82,16 @@ class MongoETLJob:
         )
         os.makedirs(self.data_folder, exist_ok=True)
 
+    def _clean_local_staging(self):
+        self._logger.info('Clean up local staging.')
+        folder = os.path.join(
+            self.local_folder,
+            self._job_config.server_name,
+            self._job_config.db_name,
+            self._job_config.job_name
+        )
+        utils.clear_local_files(folder)
+
     def _save_to_local(self):
         df = pd.DataFrame(self._data)
         filename = str(int(time.time())) + '.json'
@@ -114,6 +124,7 @@ class MongoETLJob:
             self._now = int(self._job_config.end_date)
 
     def _initialize_dwh_client(self):
+        self._get_dwh_info()
         self.dwh_client = PostgresDB(
             host=self.dwh_info['host'],
             port=int(self.dwh_info['port']),
@@ -129,7 +140,7 @@ class MongoETLJob:
         is_exist = self.dwh_client.check_table_exists(self._job_config.destination_table)
 
         if is_exist:
-            self._logger.info(f'Table {self.metadata.table_name} exists!')
+            self._logger.info(f'Table {self._job_config.destination_table} exists!')
         else:
             self.dwh_client.create_new_table(self._job_config.destination_table, self._job_config.schema)
 
@@ -159,6 +170,7 @@ class MongoETLJob:
 
     def _etl_data(self):
         try:
+            self._clean_local_staging()
             self._prepare_local_data_folder()
             self._extract_data()
             self._load_data_to_dwh()

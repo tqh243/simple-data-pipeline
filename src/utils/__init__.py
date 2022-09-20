@@ -1,5 +1,6 @@
 import os
 import logging
+import shutil
 from datetime import datetime, timedelta
 from functools import wraps
 from fnmatch import fnmatch
@@ -88,3 +89,15 @@ def remove_empty_folder(folder_path: str, file_format: str):
             os.rmdir(path)
         except OSError as e:
             logging.warning(e)
+
+def clear_local_files(folder_name):
+    logging.info(f'Clear folder {folder_name}')
+    if os.path.exists(folder_name):
+        logging.info(f"Delete data from {folder_name}")
+        try:
+            shutil.rmtree(folder_name)
+        except Exception as e:
+            logging.error(e)
+            raise Exception
+    else:
+        logging.info('Folder has not been created')
