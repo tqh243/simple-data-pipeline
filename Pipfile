@@ -13,6 +13,10 @@ isodate = "*"
 numpy = "1.22.4"
 sqlalchemy = "==1.4.36"
 openpyxl = "*"
+pymongo = "==4.2.0"
+pyyaml = "==6.0"
+pygsheets = "==2.0.5"
+pyodbc = "==4.0.34"
 
 [dev-packages]
 

@@ -2,6 +2,7 @@ import os
 import logging
 from datetime import datetime, timedelta
 from functools import wraps
+from fnmatch import fnmatch
 
 import emoji
 import pendulum
@@ -10,29 +11,11 @@ from src.utils import constants
 
 current_date_format_utc = datetime.utcnow().strftime('%Y-%m-%d')
 
-def init_log(pipeline_name: str):
-    logging.basicConfig(
-        format='[%(levelname)s] %(asctime)s %(name)s: %(message)s',
-        datefmt="%Y-%m-%d %H:%M:%S",
-        level=logging.DEBUG
-    )
-    log_folder = os.path.join(constants.LOG_BASE_FOLDER, pipeline_name, current_date_format_utc)
-    os.makedirs(log_folder, exist_ok=True)
-
-    logger = logging.getLogger(pipeline_name)
-    logger.setLevel(logging.DEBUG)
-    log_filename = datetime.utcnow().hour
-
-    # log file handler
-    formatter = logging.Formatter('[%(levelname)s] %(asctime)s %(name)s: %(message)s')
-    file_handler = logging.FileHandler(f'{log_folder}/{log_filename}.log')
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-
-    logger.addHandler(file_handler)
-
-    return logger
-
+logging.basicConfig(
+    format='[%(levelname)s] %(asctime)s %(name)s: %(message)s',
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO
+)
 
 def log_time(logger):
     def timing(func):
@@ -82,3 +65,26 @@ def get_date_record():
 
 def convert_epoch_to_timestamp(epoch_time: int):
     return datetime.fromtimestamp(epoch_time).strftime(constants.DATETIME_FORMAT)
+
+
+def get_all_files_in_folder(folder_path: str, pattern: str = '*'):
+    all_files = []
+    for path, _, files in os.walk(folder_path):
+        for name in files:
+            if fnmatch(name, pattern):
+                all_files.append(os.path.join(path, name))
+
+    return all_files
+
+def remove_empty_folder(folder_path: str, file_format: str):
+    for path, _, files in os.walk(folder_path, topdown=False):
+        for name in files:
+            if not(name.endswith(file_format)):
+                os.remove(os.path.join(path, name))
+
+        if path == folder_path:
+            break
+        try:
+            os.rmdir(path)
+        except OSError as e:
+            logging.warning(e)
