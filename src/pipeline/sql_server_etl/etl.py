@@ -65,14 +65,22 @@ class SqlServerETL:
         filename = str(int(time.time())) + '.json'
         full_file_path = os.path.join(self.data_folder, filename)
 
-        # sort columns follow order in schema if present
-        if self.metadata.schema:
-            columns = [x.get('name') for x in self.metadata.schema]
-            for col in columns:
-                if col not in df.columns:
-                    df[col] = None
+        # convert smalldateime/epoch time to timestamp
+        epoch_timestamp_columns = [x.get('name') for x in self._schema if x.get('type') == 'SMALLDATETIME']
+        if epoch_timestamp_columns:
+            print(epoch_timestamp_columns)
+            df[epoch_timestamp_columns] = pd.to_datetime(df[epoch_timestamp_columns], unit='ms')
 
-            df = df[columns]
+            # convert smalldatetime type to timestamp
+            df[df['type']=='SMALLDATETIME'] = 'TIMESTAMP'
+
+        # sort columns follow order in schema if present
+        columns = [x.get('name') for x in self._schema]
+        for col in columns:
+            if col not in df.columns:
+                df[col] = None
+
+        df = df[columns]
 
         df.to_json(full_file_path, orient='records', lines=True)
 

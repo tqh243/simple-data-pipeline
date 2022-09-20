@@ -67,7 +67,7 @@ class SqlServerDB:
         query = """
         SELECT COLUMN_NAME AS name,
             CASE
-                WHEN DATA_TYPE LIKE '%int%' OR DATA_TYPE IN ('SMALLDATETIME') THEN 'INTEGER'
+                WHEN DATA_TYPE LIKE '%int%' THEN 'INTEGER'
                 WHEN DATA_TYPE IN ('decimal', 'money', 'NUMERIC') THEN 'FLOAT'
                 WHEN DATA_TYPE IN ('char', 'nchar', 'varchar','nvarchar','uniqueidentifier') THEN 'VARCHAR'
                 WHEN DATA_TYPE ='bit' THEN 'BOOLEAN'
