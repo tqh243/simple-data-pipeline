@@ -23,8 +23,6 @@ class MysqlDB:
         self._logger = logging.getLogger(__class__.__name__)
         self.host = 'host.docker.internal' if ENVIRONMENT == 'DEVELOPMENT' else host
         self.port = 6000 if ENVIRONMENT == 'DEVELOPMENT' else port
-        self.host = 'host.docker.internal'
-        self.port = 6000
         self.user = user
         self.password = password
         self.database = database
