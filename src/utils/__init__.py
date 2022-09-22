@@ -101,3 +101,12 @@ def clear_local_files(folder_name):
             raise Exception
     else:
         logging.info('Folder has not been created')
+
+def parse_string_to_list(input_str: str, delimiter: str=',', reserved_order: bool=False):
+    if input_str:
+        if reserved_order:
+            return list(map(str.strip, str(input_str).split(delimiter)))
+        else:
+            return list(set(list(map(str.strip, str(input_str).split(delimiter)))))
+    else:
+        return []

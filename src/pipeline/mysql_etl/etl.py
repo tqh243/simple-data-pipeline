@@ -9,11 +9,11 @@ from src import utils
 from src.utils.metadata import ETLMetadata
 from src.utils.gsheet import GoogleSheet
 from src.utils.rbms.postgresdb import PostgresDB
-from src.utils.rbms.sql_server import SqlServerDB
+from src.utils.rbms.mysql import MysqlDB
 
-class SqlServerETL:
+class MysqlETL:
 
-    local_folder = 'staging/sql_server'
+    local_folder = 'staging/mysql'
     gsheet_id = os.getenv('GOOGLE_SHEET_METADATA_ID')
     batch_size = 50000
 
@@ -41,13 +41,12 @@ class SqlServerETL:
 
     def _initialize_source_db_client(self):
         self._logger.info(f'Initialize connection to {self.metadata.server_info["host"]}')
-        self.source_db_client = SqlServerDB(
+        self.source_db_client = MysqlDB(
             host=self.metadata.server_info['host'],
             port=int(self.metadata.server_info['port']),
             user=self.metadata.server_info['username'],
             password=self.metadata.server_info['password'],
             database=self.metadata.db_name,
-            catalog=self.metadata.server_info['db_schema']
         )
 
     def _prepare_local_data_folder(self):
@@ -93,8 +92,10 @@ class SqlServerETL:
         if string_columns:
             df[string_columns] = df[string_columns].astype(str)
 
-        # add bu_code column
-        df['bu_code'] = self.metadata.db_name
+        # integer column
+        number_column = [x.get('name') for x in self._schema if x.get('type')=='INTEGER']
+        if number_column:
+            df[number_column] = df[number_column].fillna(0)
 
         df.to_json(full_file_path, orient='records', date_format='iso', lines=True)
 
@@ -107,17 +108,15 @@ class SqlServerETL:
         for i in range(total_batches):
             query = """
             SELECT *
-            FROM {db_name}.{catalog}.{table}
+            FROM {table}
             """.format(
-                db_name=self.metadata.db_name,
-                catalog=self.metadata.server_info['db_schema'],
                 table=self.metadata.table_name
             )
             if self.metadata.max_column:
                 query += f"""
                 ORDER BY {self.metadata.max_column}
-                OFFSET {offset} ROWS
-                FETCH NEXT {self.batch_size} ROWS ONLY
+                LIMIT {self.batch_size}
+                OFFSET {offset}
                 """
 
             queries.append(query)
@@ -140,9 +139,6 @@ class SqlServerETL:
             self._schema = self.metadata.schema
         else:
             self._schema = self.source_db_client.get_schema_from_source_table(self.metadata.table_name, self.metadata.key_columns)
-
-        # add bu_code column
-        self._schema.append({'name': 'bu_code', 'type': 'VARCHAR', 'mode': 'NULLABLE'})
 
     def _load_data_to_dwh(self):
         self._logger.info('Load data to DWH')
